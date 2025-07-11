@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<a href="{% url 'main:main' %}">
+    <button type="submit">To the Main Page</button>
+</a>
+{% block content %}
+{% endblock %}
+</body>
+</html>

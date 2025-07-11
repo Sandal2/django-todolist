@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Days</h1>
+{% for day in days %}
+<a href="{% url 'main:tasks' day.pk %}">{{ day }}</a>
+{% endfor %}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+        <button type="submit">Send</button>
+    </p>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Tasks</h1>
+
+{% if messages %}
+{% for message in messages %}
+{{ message }}
+{% endfor %}
+{% endif %}
+
+{% for task in tasks %}
+<h2>{{ task }}</h2>
+<ul>
+    <li>Description: {{ task.description }}</li>
+    <li>Priority: {{ task.get_priority_display }}</li>
+    <li>Status:
+        {% if task.is_done %}
+        Done ✓
+        {% else %}
+        Not done ×
+        {% endif %}
+        <form action="{% url 'main:change_status' task.pk %}" method="POST">
+            {% csrf_token %}
+            <button type="submit">Change status</button>
+        </form>
+    </li>
+</ul>
+
+<form action="{% url 'main:delete' task.pk %}" method="POST" onsubmit="return confirm ('Are you sure?')">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+</form>
+{% endfor %}
+
+<div><a href="{% url 'main:add_task' day_pk %}">Add Task</a></div>
+{% endblock %}
