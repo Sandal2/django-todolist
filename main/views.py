@@ -32,7 +32,7 @@ def add_task(request, day_pk):
             task = form.save(commit=False)  # создаём объект модели (Task) из данных формы, но не сохраняем
             task.date_id = day_pk  # задаем внешний ключ date_id значение day_pk
             task.save()  # сохраняем объект модели (Task) в бд
-            messages.success(request, 'Task added succesfully')
+            messages.success(request, 'Task added successfully')
             return redirect('main:tasks', day_pk)
     else:
         form = AddTaskForm()

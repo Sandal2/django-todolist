@@ -5,9 +5,26 @@
     <title>{{ title }}</title>
 </head>
 <body>
-<a href="{% url 'main:main' %}">
-    <button type="submit">To the Main Page</button>
-</a>
+<div>
+    <a href="{% url 'main:main' %}">
+        <button type="submit">To the Main Page</button>
+    </a>
+    {% if user.is_authenticated %}
+    <div>
+        {{ user.username }}
+        <form action="{% url 'users:logout' %}" method="POST" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+    {% else %}
+    <div><a href="{% url 'users:login' %}">
+        <button type="submit">Login</button>
+    </a> | <a href="#">
+        <button type="submit">Register</button>
+    </a></div>
+    {% endif %}
+</div>
 {% block content %}
 {% endblock %}
 </body>

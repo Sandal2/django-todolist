@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +125,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'main:main'  # url, на который будет выполнено перенаправление после успешной авторизации
+LOGIN_URL = 'users:login'  # url, на который будет перенаправлен неавторизованный пользователь при попытке посетить закрытую часть сайта
+LOGOUT_REDIRECT_URL = 'users:login'  # url, на который будет перенаправлен пользователь после выхода из аккаунта
