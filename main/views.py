@@ -1,17 +1,21 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from main.forms import AddTaskForm, AddDateForm
 from main.models import Task, Date
 
 
+@login_required
 def main_page(request):
-    days = Date.objects.all()  # извлекаем все объекты Date
+    days = Date.objects.filter(user=request.user)  # извлекаем все объекты Date текущего авторизованного пользователя
 
     if request.method == 'POST':
         form = AddDateForm(request.POST)
         if form.is_valid():
-            form.save()
+            date = form.save(commit=False)  # создаём объект модели Date из данных формы, но не сохраняем
+            date.user = request.user  # привязываем текущего авторизованного пользователя к полю user модели Date
+            date.save()  # сохраняем объект модели Date в бд
             return redirect('main:main')
     else:
         form = AddDateForm()
@@ -29,9 +33,9 @@ def add_task(request, day_pk):
     if request.method == 'POST':
         form = AddTaskForm(request.POST)
         if form.is_valid():
-            task = form.save(commit=False)  # создаём объект модели (Task) из данных формы, но не сохраняем
+            task = form.save(commit=False)  # создаём объект модели Task из данных формы, но не сохраняем
             task.date_id = day_pk  # задаем внешний ключ date_id значение day_pk
-            task.save()  # сохраняем объект модели (Task) в бд
+            task.save()  # сохраняем объект модели Task в бд
             messages.success(request, 'Task added successfully')
             return redirect('main:tasks', day_pk)
     else:

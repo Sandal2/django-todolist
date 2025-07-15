@@ -1,12 +1,14 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
 
 class Date(models.Model):
     date = models.DateField(default=timezone.now, unique=True)  # дата по умолчанию - нынешний день
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
-        return str(self.date)
+        return self.date.strftime('%d.%m.%Y')  # вывод в формате дд.мм.гггг
 
 
 class Task(models.Model):

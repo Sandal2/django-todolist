@@ -6,6 +6,7 @@ class AddDateForm(forms.ModelForm):
     class Meta:
         model = Date
         fields = '__all__'
+        exclude = ['user']  # исключаем user из полей формы
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),  # календарь
         }

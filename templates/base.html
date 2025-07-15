@@ -20,7 +20,7 @@
     {% else %}
     <div><a href="{% url 'users:login' %}">
         <button type="submit">Login</button>
-    </a> | <a href="#">
+    </a> | <a href="{% url 'users:register' %}">
         <button type="submit">Register</button>
     </a></div>
     {% endif %}
