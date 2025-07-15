@@ -45,7 +45,7 @@ def add_task(request, day_pk):
 
 
 def change_task_status(request, task_pk):
-    task = Task.objects.get(pk=task_pk)
+    task = Task.objects.get(pk=task_pk, date__user=request.user)
     task.is_done = not task.is_done
     task.save()
     messages.info(request, 'Task changed successfully')
@@ -54,7 +54,7 @@ def change_task_status(request, task_pk):
 
 
 def delete_task(request, task_pk):
-    task = Task.objects.get(pk=task_pk)
+    task = Task.objects.get(pk=task_pk, date__user=request.user)
     task.delete()
     messages.warning(request, 'Task deleted successfully')
 
