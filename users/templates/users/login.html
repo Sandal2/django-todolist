@@ -1,13 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Authorization</h1>
-
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <p>
-        <button type="submit">Login</button>
-    </p>
-</form>
+<div class="d-flex justify-content-center vh-100 align-items-center flex-column">
+    <h1 class="text-center w-100">Authorization</h1>
+    <div style="max-width: 200px; width: 100%;">
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="mb-3 text-center">
+                <!--добавляем связь между label и полем формы с помощью id_for_label-->
+                <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                {{ form.username }}
+            </div>
+            <div class="mb-3 text-center">
+                <!--добавляем связь между label и полем формы с помощью id_for_label-->
+                <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                {{ form.password }}
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-outline-secondary">Login</button>
+            </div>
+        </form>
+        <div class="text-center mt-3" style="font-size: 12px;">
+            <p>Don't have an account? <a href="{% url 'users:register' %}">Register here</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}

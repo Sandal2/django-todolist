@@ -55,7 +55,8 @@ def change_task_status(request, task_pk):
 
 def delete_task(request, task_pk):
     task = Task.objects.get(pk=task_pk, date__user=request.user)
+    day_pk = task.date.pk  # присваиваем переменной day_pk pk объекта Date до удаления task
     task.delete()
     messages.warning(request, 'Task deleted successfully')
 
-    return redirect('main:tasks', task.date.pk)  # извлекаем pk объекта Date и передаём в маршрут tasks
+    return redirect('main:tasks', day_pk)
