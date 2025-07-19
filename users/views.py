@@ -22,4 +22,5 @@ def register_user(request):
     else:
         form = RegisterUserForm()
 
-    return render(request, 'users/register.html', {'title': 'Registration', 'form': form, 'hide_navbar': True})
+    return render(request, 'users/register.html',
+                  {'title': 'Registration', 'form': form, 'hide_navbar': True})  # убираем navbar в шаблоне

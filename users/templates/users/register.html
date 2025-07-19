@@ -11,6 +11,15 @@
                 <!--добавляем связь между label и полем формы с помощью id_for_label-->
                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                 {{ field }}
+
+                <!--вывод ошибок поля формы-->
+                {% if field.errors %}
+                <div class="text-danger small">
+                    {% for error in field.errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
             <div class="d-flex justify-content-center">

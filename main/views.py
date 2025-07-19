@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, ListView, FormView
 
 from main.forms import AddTaskForm, AddDateForm
 from main.models import Task, Date
@@ -23,25 +25,47 @@ def main_page(request):
     return render(request, 'main/main_page.html', {'title': 'Tasks', 'days': days, 'form': form})
 
 
-def cur_tasks(request, day_pk):
-    tasks = Task.objects.filter(date_id=day_pk)
+class CurrentTasks(ListView):
+    model = Task
+    template_name = 'main/tasks.html'
+    context_object_name = 'tasks'  # имя переменной, под которой будет доступен список задач в шаблоне
 
-    return render(request, 'main/tasks.html', {'title': 'Tasks', 'tasks': tasks, 'day_pk': day_pk})
+    def get_queryset(self):  # переопределяем выводимые объекты из модели Task
+        day_pk = self.kwargs.get('day_pk')  # достаем параметр day_pk из self.kwargs (он приходит из маршрута)
+        return Task.objects.filter(date_id=day_pk)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)  # получаем базовый context от родительского класса
+
+        context['title'] = 'Tasks'
+        context['day_pk'] = self.kwargs.get('day_pk')  # передаем day_pk в шаблон для формирования ссылок
+
+        return context  # возвращаем расширенный context для передачи в шаблон
 
 
-def add_task(request, day_pk):
-    if request.method == 'POST':
-        form = AddTaskForm(request.POST)
-        if form.is_valid():
-            task = form.save(commit=False)  # создаём объект модели Task из данных формы, но не сохраняем
-            task.date_id = day_pk  # задаем внешний ключ date_id значение day_pk
-            task.save()  # сохраняем объект модели Task в бд
-            messages.success(request, 'Task added successfully')
-            return redirect('main:tasks', day_pk)
-    else:
-        form = AddTaskForm()
+class AddTask(FormView):
+    form_class = AddTaskForm
+    template_name = 'main/add_task.html'
 
-    return render(request, 'main/add_task.html', {'title': 'Add Task', 'form': form})
+    def get_success_url(self):
+        day_pk = self.kwargs.get('day_pk')  # получаем параметр day_pk из url-маршрута
+
+        return reverse_lazy('main:tasks', kwargs={'day_pk': day_pk})  # перенаправляем пользователя
+
+    def form_valid(self, form):
+        task = form.save(commit=False)  # создаём объект модели Task из данных формы, но не сохраняем
+        task.date_id = self.kwargs.get('day_pk')  # задаем внешнему ключу date_id значение day_pk
+        form.save()  # сохраняем объект модели Task в бд
+        messages.success(self.request, 'Task added successfully')
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['title'] = 'Add Task'
+
+        return context
 
 
 def change_task_status(request, task_pk):
