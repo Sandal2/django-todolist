@@ -1,7 +1,7 @@
 from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import FormView
 
 from users.forms import RegisterUserForm, AuthenticateUserForm
 
@@ -12,15 +12,17 @@ class LoginUser(LoginView):
     extra_context = {'title': 'Authorization', 'hide_navbar': True}  # убираем navbar в шаблоне
 
 
-def register_user(request):
-    if request.method == 'POST':
-        form = RegisterUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # авторизуем пользователя сразу после регистрации
-            return redirect('main:main')
-    else:
-        form = RegisterUserForm()
+class RegisterUser(FormView):
+    form_class = RegisterUserForm
+    template_name = 'users/register.html'
+    extra_context = {
+        'title': 'Registration',
+        'hide_navbar': True  # убираем navbar в шаблоне
+    }
+    success_url = reverse_lazy('main:main')
 
-    return render(request, 'users/register.html',
-                  {'title': 'Registration', 'form': form, 'hide_navbar': True})  # убираем navbar в шаблоне
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)  # авторизуем пользователя сразу после регистрации
+
+        return super().form_valid(form)

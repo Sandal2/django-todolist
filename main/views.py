@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, FormView
+from django.views.generic import ListView, FormView
 
 from main.forms import AddTaskForm, AddDateForm
 from main.models import Task, Date
@@ -30,15 +30,17 @@ class CurrentTasks(ListView):
     template_name = 'main/tasks.html'
     context_object_name = 'tasks'  # имя переменной, под которой будет доступен список задач в шаблоне
 
-    def get_queryset(self):  # переопределяем выводимые объекты из модели Task
+    def get_queryset(self):  # переопределяем выводимые объекты из модели Task (по умолчанию выводятся все)
         day_pk = self.kwargs.get('day_pk')  # достаем параметр day_pk из self.kwargs (он приходит из маршрута)
         return Task.objects.filter(date_id=day_pk)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)  # получаем базовый context от родительского класса
+        day_pk = self.kwargs.get('day_pk')  # достаем параметр day_pk из self.kwargs (он приходит из маршрута)
 
         context['title'] = 'Tasks'
-        context['day_pk'] = self.kwargs.get('day_pk')  # передаем day_pk в шаблон для формирования ссылок
+        context['day_pk'] = day_pk  # передаем day_pk в шаблон для формирования ссылок
+        context['day'] = Date.objects.get(id=day_pk)  # передаем day в шаблон для вывода текущего дня в шаблоне
 
         return context  # возвращаем расширенный context для передачи в шаблон
 
@@ -46,8 +48,11 @@ class CurrentTasks(ListView):
 class AddTask(FormView):
     form_class = AddTaskForm
     template_name = 'main/add_task.html'
+    extra_context = {
+        'title': 'Add Task'
+    }
 
-    def get_success_url(self):
+    def get_success_url(self):  # для динамических маршрутов необходимо переопределять get_success_url
         day_pk = self.kwargs.get('day_pk')  # получаем параметр day_pk из url-маршрута
 
         return reverse_lazy('main:tasks', kwargs={'day_pk': day_pk})  # перенаправляем пользователя
@@ -59,13 +64,6 @@ class AddTask(FormView):
         messages.success(self.request, 'Task added successfully')
 
         return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['title'] = 'Add Task'
-
-        return context
 
 
 def change_task_status(request, task_pk):

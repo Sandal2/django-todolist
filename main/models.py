@@ -21,7 +21,7 @@ class Task(models.Model):
     ]
 
     title = models.CharField(max_length=20)
-    description = models.TextField(blank=True)
+    description = models.TextField(max_length=100, blank=True)
     priority = models.CharField(max_length=2, choices=PRIORITY_CHOICES, default='M')
     is_done = models.BooleanField(default=False)
     date = models.ForeignKey('Date', on_delete=models.PROTECT)
