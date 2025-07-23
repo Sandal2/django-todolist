@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
+    <!--bootsrtrap-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!--flatpickr-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
 <!--убираем navbar-->
@@ -28,8 +31,27 @@
     </div>
 </nav>
 {% endif %}
+
 {% block content %}
 {% endblock %}
+
+<!--поменять блок кода. разобраться с тем как работают messages-->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show"
+         role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<!--bootstrap-->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!--flatpickr-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% block extra_scripts %}
+{% endblock %}
 </body>
 </html>

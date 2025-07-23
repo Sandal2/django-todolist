@@ -2,51 +2,40 @@
 
 {% block content %}
 
-{% if messages %}
-{% for message in messages %}
-{{ message }}
-{% endfor %}
-{% endif %}
-
-<div class="container d-flex justify-content-center" style="margin-top: 80px; margin-bottom: 80px;">
+<div class="container d-flex justify-content-center" style="margin-top: 60px; margin-bottom: 60px;">
     <div class="card p-3 w-100" style="max-width: 1200px;">
         <table class="table" style="table-layout: fixed; width: 100%;">
-            <caption>Tasks for {{ day.date|date:"d M Y" }}.
+            <caption class="text-center">
+                <span>Tasks for {{ day.date|date:"d M Y" }}.</span>
                 <a href="{% url 'main:add_task' day_pk %}" class="link-secondary">Click here to add a new task</a>
             </caption>
             <thead>
             <tr>
-                <th style="width: 20%;" scope="col">Task</th>
-                <th style="width: 40%;" scope="col" class="text-break">Description</th>
-                <th style="width: 10%;" scope="col">Priority</th>
-                <th style="width: 10%;" scope="col">Status</th>
-                <th style="width: 20%;" scope="col">Options</th>
+                <th style="width: 20%;" scope="col" class="text-center">Task</th>
+                <th style="width: 40%;" scope="col" class="text-wrap text-center">Description</th>
+                <th style="width: 20%;" scope="col" class="text-center">Priority</th>
+                <th style="width: 20%;" scope="col" class="text-center">Status</th>
             </tr>
             </thead>
             <tbody>
             {% for task in tasks %}
             <tr>
-                <td>{{ task }}</td>
-                <td>{{ task.description }}</td>
-                <td>{{ task.get_priority_display }}</td>
-                <td>
+                <td class="text-center">{{ task }}</td>
+                <td class="text-center">{{ task.description }}</td>
+                <td class="text-center">{{ task.get_priority_display }}</td>
+                <td class="text-center">
                     {% if task.is_done %}
-                    Done ✓
+                    <form action="{% url 'main:change_status' task.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-body p-0 text-decoration-none">Done ✓</button>
+                    </form>
                     {% else %}
-                    Not done ×
+                    <form action="{% url 'main:change_status' task.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-body p-0 text-decoration-none">Not done ×
+                        </button>
+                    </form>
                     {% endif %}
-                </td>
-                <td>
-                    <div class="d-flex gap-2">
-                        <form action="{% url 'main:change_status' task.pk %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">Change Status</button>
-                        </form>
-                        <form action="{% url 'main:delete' task.pk %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-dark btn-sm">Delete</button>
-                        </form>
-                    </div>
                 </td>
             </tr>
             {% endfor %}

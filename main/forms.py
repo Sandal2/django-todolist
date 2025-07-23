@@ -8,7 +8,10 @@ class AddDateForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['user']  # исключаем user из полей формы
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),  # календарь
+            'date': forms.DateInput(attrs={
+                'class': 'form-control flatpickr',  # делаем календарь с помощью flatpickr
+                'placeholder': 'Select a date',
+            }),
         }
 
 
@@ -17,3 +20,20 @@ class AddTaskForm(forms.ModelForm):
         model = Task
         fields = '__all__'
         exclude = ['date']  # исключаем дату из полей формы
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter task title',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter task description',
+            }),
+            'priority': forms.Select(attrs={
+                'class':'form-select',
+            }),
+            'is_done': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
+        }

@@ -1,15 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Days</h1>
-{% for day in days %}
-<a href="{% url 'main:tasks' day.pk %}">{{ day }}</a>
-{% endfor %}
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <p>
-        <button type="submit">Send</button>
-    </p>
-</form>
+<div class="container d-flex justify-content-center" style="margin-top: 60px; margin-bottom: 60px;">
+    <div class="card p-4 w-100" style="max-width: 1200px;">
+        <h3 class="mb-4 text-center">Your dates</h3>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-7 g-3">
+            {% for day in days %}
+            <div class="col">
+                <a href="{% url 'main:tasks' day.pk %}" class="btn w-100 py-3 btn-outline-secondary">
+                    {{ day }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <form action="" method="POST" class="mt-4">
+            {% csrf_token %}
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-7 g-3 justify-content-center">
+                <div class="col">
+                    {{ form.date }}
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-secondary w-100">Add date</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr(".flatpickr", {
+        dateFormat: "Y-m-d",
+    });
+</script>
 {% endblock %}

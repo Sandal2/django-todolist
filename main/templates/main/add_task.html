@@ -1,12 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Add Task</h1>
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <p>
-        <button type="submit">Send</button>
-    </p>
-</form>
+<div class="container d-flex justify-content-center" style="margin-top: 60px; margin-bottom:60px;">
+    <div class="card p-3 w-100" style="max-width: 1200px;">
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.title }}
+            </div>
+            <div class="mb-3">
+                {{ form.description }}
+            </div>
+            <div class="mb-3">
+                {{ form.priority }}
+            </div>
+            <div class="mb-3">
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="is_done" id="done" value="True"
+                           {% if form.initial.is_done %}checked{% endif %} autocomplete="off">
+                    <label for="done" class="btn btn-outline-secondary w-50">Task is done</label>
+
+                    <input type="radio" class="btn-check" name="is_done" id="not_done" value="False"
+                           {% if not form.initial.is_done %}checked{% endif %} autocomplete="off">
+                    <label for="not_done" class="btn btn-outline-dark w-50">Task isn't done</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-secondary">Add Task</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
