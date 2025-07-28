@@ -19,7 +19,7 @@ class RegisterUser(FormView):
         'title': 'Registration',
         'hide_navbar': True  # убираем navbar в шаблоне
     }
-    success_url = reverse_lazy('main:main')
+    success_url = reverse_lazy('main:main')  # нужен ли нам success_url тут?
 
     def form_valid(self, form):
         user = form.save()
