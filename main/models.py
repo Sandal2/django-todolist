@@ -4,8 +4,11 @@ from django.utils import timezone
 
 
 class Date(models.Model):
-    date = models.DateField(default=timezone.now, unique=True)  # дата по умолчанию - нынешний день
+    date = models.DateField(default=timezone.now)  # дата по умолчанию - нынешний день
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ('date', 'user')  # уникальность по паре значений
 
     def __str__(self):
         return self.date.strftime('%d.%m.%Y')  # вывод в формате дд.мм.гггг

@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="container d-flex justify-content-center" style="margin-top: 60px; margin-bottom: 60px;">
     <div class="card p-3 w-100" style="max-width: 1200px;">
         <table class="table" style="table-layout: fixed; width: 100%;">
             <caption class="text-center">
-                <span>Tasks for {{ day.date|date:"d M Y" }}.</span>
-                <a href="{% url 'main:add_task' day_pk %}" class="link-secondary">Click here to add a new task</a>
+                <span>Tasks for {{ day.date }}.</span>
+                <a href="{% url 'main:add_task' day.date %}" class="link-secondary">Click here to add a new task</a>
             </caption>
             <thead>
             <tr>

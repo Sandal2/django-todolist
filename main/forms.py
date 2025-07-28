@@ -9,7 +9,7 @@ class AddDateForm(forms.ModelForm):
         exclude = ['user']  # исключаем user из полей формы
         widgets = {
             'date': forms.DateInput(attrs={
-                'class': 'form-control flatpickr',  # делаем календарь с помощью flatpickr
+                'class': 'form-control flatpickr text-center',  # делаем календарь с помощью flatpickr
                 'placeholder': 'Select a date',
             }),
         }

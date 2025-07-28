@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
 
@@ -31,16 +31,16 @@ class CurrentTasks(ListView):
     context_object_name = 'tasks'  # имя переменной, под которой будет доступен список задач в шаблоне
 
     def get_queryset(self):  # переопределяем выводимые объекты из модели Task (по умолчанию выводятся все)
-        day_pk = self.kwargs.get('day_pk')  # достаем параметр day_pk из self.kwargs (он приходит из маршрута)
-        return Task.objects.filter(date_id=day_pk)
+        day_date = self.kwargs['day_date']
+        self.day = get_object_or_404(Date, date=day_date, user=self.request.user)  # self для повторного использования
+
+        return Task.objects.filter(date=self.day)  # возвращаем все объекты модели Task, связанные с day
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)  # получаем базовый context от родительского класса
-        day_pk = self.kwargs.get('day_pk')  # достаем параметр day_pk из self.kwargs (он приходит из маршрута)
 
         context['title'] = 'Tasks'
-        context['day_pk'] = day_pk  # передаем day_pk в шаблон для формирования ссылок
-        context['day'] = Date.objects.get(id=day_pk)  # передаем day в шаблон для вывода текущего дня в шаблоне
+        context['day'] = self.day  # передаем day для формирования ссылок
 
         return context  # возвращаем расширенный context для передачи в шаблон
 
@@ -48,37 +48,36 @@ class CurrentTasks(ListView):
 class AddTask(FormView):
     form_class = AddTaskForm
     template_name = 'main/add_task.html'
-    extra_context = {
-        'title': 'Add Task'
-    }
+    extra_context = {'title': 'Add Task'}
 
     def get_success_url(self):  # для динамических маршрутов необходимо переопределять get_success_url
-        day_pk = self.kwargs.get('day_pk')  # получаем параметр day_pk из url-маршрута
-
-        return reverse_lazy('main:tasks', kwargs={'day_pk': day_pk})  # перенаправляем пользователя
+        return reverse_lazy('main:tasks', kwargs={'day_date': self.kwargs['day_date']})  # перенаправляем пользователя
 
     def form_valid(self, form):
+        day_date = self.kwargs['day_date']
+        day = get_object_or_404(Date, date=day_date, user=self.request.user)
+
         task = form.save(commit=False)  # создаём объект модели Task из данных формы, но не сохраняем
-        task.date_id = self.kwargs.get('day_pk')  # задаем внешнему ключу date_id значение day_pk
-        form.save()  # сохраняем объект модели Task в бд
+        task.date = day  # устанавливаем связь для task с текущей датой (day)
+        task.save()  # сохраняем объект модели Task в бд
         messages.success(self.request, 'Task added successfully')
 
         return super().form_valid(form)
 
 
 def change_task_status(request, task_pk):
-    task = Task.objects.get(pk=task_pk, date__user=request.user)
+    task = get_object_or_404(Task, pk=task_pk, date__user=request.user)
     task.is_done = not task.is_done
     task.save()
     messages.info(request, 'Task changed successfully')
 
-    return redirect('main:tasks', task.date.pk)  # извлекаем pk объекта Date и передаём в маршрут tasks
+    return redirect('main:tasks', task.date.date)  # извлекаем pk объекта Date и передаём в маршрут tasks
 
 
 def delete_task(request, task_pk):
-    task = Task.objects.get(pk=task_pk, date__user=request.user)
-    day_pk = task.date.pk  # присваиваем переменной day_pk pk объекта Date до удаления task
+    task = get_object_or_404(Task, pk=task_pk, date__user=request.user)
+    date_value = task.date.date  # сохраняем значение task.date.date до удаления для редиректа
     task.delete()
     messages.warning(request, 'Task deleted successfully')
 
-    return redirect('main:tasks', day_pk)
+    return redirect('main:tasks', date_value)

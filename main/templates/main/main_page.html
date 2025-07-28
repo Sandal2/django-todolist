@@ -7,7 +7,7 @@
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-7 g-3">
             {% for day in days %}
             <div class="col">
-                <a href="{% url 'main:tasks' day.pk %}" class="btn w-100 py-3 btn-outline-secondary">
+                <a href="{% url 'main:tasks' day.date %}" class="btn w-100 py-3 btn-outline-secondary">
                     {{ day }}
                 </a>
             </div>
@@ -33,7 +33,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     flatpickr(".flatpickr", {
-        dateFormat: "Y-m-d",
+        dateFormat: "d.m.Y",
     });
 </script>
 {% endblock %}
