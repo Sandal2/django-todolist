@@ -22,7 +22,7 @@ def main_page(request):
     else:
         form = AddDateForm()
 
-    return render(request, 'main/main_page.html', {'title': 'Tasks', 'days': days, 'form': form})
+    return render(request, 'main/main_page.html', {'title': 'Dates', 'days': days, 'form': form})
 
 
 class CurrentTasks(ListView):
@@ -71,7 +71,7 @@ def change_task_status(request, task_pk):
     task.save()
     messages.info(request, 'Task changed successfully')
 
-    return redirect('main:tasks', task.date.date)  # извлекаем pk объекта Date и передаём в маршрут tasks
+    return redirect('main:tasks', task.date.date)
 
 
 def delete_task(request, task_pk):
