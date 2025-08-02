@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from main.models import Date
+from main.models import Date, Task
 
 User = get_user_model()
 
@@ -41,9 +41,11 @@ class MainPageTestCase(TestCase):
     def test_get_correct_data(self):  # проверяем отображение дат только текущего пользователя
         other_user = User.objects.create_user(username='other', password='4321')  # создаем нового пользователя
         Date.objects.create(user=other_user, date=date(2025, 7, 29))  # добавляем для него дату
+
         response = self.client.get(self.path)
         dates = response.context['days']
 
+        self.assertEqual(dates.count(), 1)
         self.assertIn(self.existing_date, dates)  # проверяем что existing_date есть в коллекции dates
 
     def test_success_add_date(self):  # отправка формы
@@ -52,6 +54,74 @@ class MainPageTestCase(TestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)  # проверяем редирект
         self.assertTrue(Date.objects.filter(date=data['date'], user=self.user).exists())  # проверяем на наличие в бд
+
+    def tearDown(self):
+        pass
+
+
+class CurrentTasksTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='tester', password='1234')
+        self.client.force_login(self.user)
+        self.existing_date = Date.objects.create(user=self.user, date=date(2025, 7, 31))
+        self.existing_task = Task.objects.create(title='test', date=self.existing_date)
+        self.path = reverse('main:tasks', kwargs={'day_date': self.existing_date.date})
+
+    def test_get_cur_tasks_page(self):
+        response = self.client.get(self.path)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'main/tasks.html')
+        self.assertContains(response, 'Tasks')
+
+    def test_get_data(self):
+        response = self.client.get(self.path)
+        tasks = response.context['tasks']
+
+        self.assertEqual(tasks.count(), 1)
+
+    def test_get_correct_data(self):
+        other_user = User.objects.create_user(username='other_user', password='4321')
+        other_date = Date.objects.create(user=other_user, date=date(2025, 7, 30))
+        Task.objects.create(title='other_task', date=other_date)
+
+        response = self.client.get(self.path)
+        tasks = response.context['tasks']
+
+        self.assertEqual(tasks.count(), 1)  # добавить в MainPageTestCase если обязательная проверка
+        self.assertIn(self.existing_task, tasks)
+
+    def test_get_other_user_tasks_error(self):
+        other_user = User.objects.create_user(username='other_user', password='4321')
+        other_date = Date.objects.create(user=other_user, date=date(2025, 7, 30))
+
+        response = self.client.get(reverse('main:tasks', kwargs={'day_date': other_date.date}))
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def tearDown(self):
+        pass
+
+
+class AddTaskTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='tester', password='1234')
+        self.client.force_login(self.user)
+        self.existing_date = Date.objects.create(user=self.user, date=date(2025, 7, 31))
+        self.path = reverse('main:add_task', kwargs={'day_date': self.existing_date.date})
+
+    def test_get_add_task_form(self):
+        response = self.client.get(self.path)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'main/add_task.html')
+        self.assertContains(response, 'Add Task')
+
+    def test_success_add_task(self):
+        response = self.client.post(self.path, {'title': 'test', 'priority': 'M'})
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertTrue(Task.objects.filter(title='test', date=self.existing_date).exists())
 
     def tearDown(self):
         pass
