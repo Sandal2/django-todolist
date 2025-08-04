@@ -88,7 +88,7 @@ class CurrentTasksTestCase(TestCase):
         response = self.client.get(self.path)
         tasks = response.context['tasks']
 
-        self.assertEqual(tasks.count(), 1)  # добавить в MainPageTestCase если обязательная проверка
+        self.assertEqual(tasks.count(), 1)
         self.assertIn(self.existing_task, tasks)
 
     def test_get_other_user_tasks_error(self):
