@@ -19,7 +19,11 @@ class Migration(migrations.Migration):
                 ('date', models.DateField(default=django.utils.timezone.now, unique=True)),
             ],
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='task',
+            name='date',
+        ),
+        migrations.AddField(
             model_name='task',
             name='date',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='main.date'),
