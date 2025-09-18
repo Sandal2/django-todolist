@@ -22,14 +22,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      - DB_NAME=todolist_db
-      - DB_USER=todolist
-      - DB_PASSWORD=1234
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DJANGO_SECRET_KEY=your_secret_key
-      - DEBUG=0
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
