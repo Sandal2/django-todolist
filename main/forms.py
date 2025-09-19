@@ -14,6 +14,10 @@ class AddDateForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['date'].input_formats = ['%d.%m.%Y']
+
 
 class AddTaskForm(forms.ModelForm):
     class Meta:
@@ -31,7 +35,7 @@ class AddTaskForm(forms.ModelForm):
                 'placeholder': 'Enter task description',
             }),
             'priority': forms.Select(attrs={
-                'class':'form-select',
+                'class': 'form-select',
             }),
             'is_done': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',
