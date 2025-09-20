@@ -1,27 +1,37 @@
-from rest_framework import generics, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from api.serializers import MainPageSerializer, TasksSerializer
-
+from .serializers import DateSerializer, TaskSerializer
 from main.models import Date, Task
 
 
-class MainPageAPIView(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]  # ограничения доступа
-    serializer_class = MainPageSerializer
-    lookup_field = 'date'  # поле, по которому будет происходить поиск в get_object() (по умолчанию поиск проходит по pk)
+class DateAPIView(APIView):
+    def get(self, request):
+        queryset = Date.objects.filter(user=request.user)
+        serializer = DateSerializer(queryset, many=True)
 
-    def get_queryset(self):
-        return Date.objects.filter(user=self.request.user)
+        return Response(serializer.data)
 
-    def perform_create(self, serializer):  # переопределяем метод для привязки пользователя к дате
-        serializer.save(user=self.request.user)  # по умолчанию serializer.save()
+    def post(self, request):
+        serializer = DateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user)
 
-    @action(methods=['get'], detail=True)  # новый маршрут для получения задач по дате
-    def tasks(self, request, date=None):
-        date_obj = self.get_object()
-        tasks = Task.objects.filter(date=date_obj)
-        serializer = TasksSerializer(tasks, many=True)
+        return Response(serializer.data)
+
+
+class TaskAPIView(APIView):
+    def get(self, request, day_date):
+        queryset = Task.objects.filter(date__date=day_date)  # сравниваем day_date с полем модели date__date
+        serializer = TaskSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request, day_date):
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            date_obj = Date.objects.get(date=day_date, user=request.user)  # находим объект модели Date по дате day_date
+            serializer.save(date=date_obj)  # сохраняем Task и устанавливаем для его поля date найденный объект Date
+
         return Response(serializer.data)

@@ -1,17 +1,11 @@
-from django.urls import path, include
-from rest_framework import routers
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from django.urls import path, register_converter
 
-from api.views import MainPageAPIView
+from main.converters import DateConverter  # импортируем конвертер
+from . import views
 
-app_name = 'api'
-
-router = routers.DefaultRouter()
-router.register(r'dates', MainPageAPIView, basename='dates')
+register_converter(DateConverter, 'ddmmyyyy')  # регистрируем конвертер
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify')
+    path('', views.DateAPIView.as_view()),
+    path('tasks/<ddmmyyyy:day_date>/', views.TaskAPIView.as_view())  # добавляем эндпоинт для тасков в формате ддммгггг
 ]
