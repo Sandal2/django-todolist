@@ -39,7 +39,7 @@ class TaskAPIView(APIView):
     def patch(self, request, *args, **kwargs):
         pk = kwargs.get('pk', None)
         if not pk:
-            return Response({'error': 'Method PUT is not allowed'})
+            return Response({'error': 'Method PATCH is not allowed'})
 
         try:
             instance = Task.objects.get(pk=pk)
@@ -51,3 +51,16 @@ class TaskAPIView(APIView):
             serializer.save()
 
             return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        if not pk:
+            return Response({'error': 'Method DELETE is not allowed'})
+
+        try:
+            instance = Task.objects.get(pk=pk)
+        except:
+            return Response({'error': 'Object does not exists'})
+
+        instance.delete()
+        return Response({'message': f'Task {pk} deleted successfully'})
