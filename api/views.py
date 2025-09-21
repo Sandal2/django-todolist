@@ -35,3 +35,19 @@ class TaskAPIView(APIView):
             serializer.save(date=date_obj)  # сохраняем Task и устанавливаем для его поля date найденный объект Date
 
         return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        pk = kwargs.get('pk', None)
+        if not pk:
+            return Response({'error': 'Method PUT is not allowed'})
+
+        try:
+            instance = Task.objects.get(pk=pk)
+        except:
+            return Response({'error': 'Object does not exists'})
+
+        serializer = TaskSerializer(data=request.data, instance=instance, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+            return Response(serializer.data)
