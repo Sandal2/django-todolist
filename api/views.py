@@ -1,66 +1,47 @@
 from rest_framework import generics
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
-from .serializers import DateSerializer, TaskSerializer
+from .serializers import DateSerializer, TaskSerializer, TaskStatusSerializer
 from main.models import Date, Task
 
 
-class DateAPIView(APIView):
-    def get(self, request):
-        queryset = Date.objects.filter(user=request.user)
-        serializer = DateSerializer(queryset, many=True)
+class DateViewSet(ModelViewSet):
+    serializer_class = DateSerializer
 
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Date.objects.filter(user=self.request.user)
 
-    def post(self, request):
-        serializer = DateSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
-class TaskAPIView(APIView):
-    def get(self, request, day_date):
-        queryset = Task.objects.filter(date__date=day_date)  # сравниваем day_date с полем модели date__date
-        serializer = TaskSerializer(queryset, many=True)
+class TaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
 
-        return Response(serializer.data)
+    def get_queryset(self):
+        day_date = self.kwargs.get('day_date')
+        return Task.objects.filter(date__date=day_date, date__user=self.request.user)
 
-    def post(self, request, day_date):
-        serializer = TaskSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            date_obj = Date.objects.get(date=day_date, user=request.user)  # находим объект модели Date по дате day_date
-            serializer.save(date=date_obj)  # сохраняем Task и устанавливаем для его поля date найденный объект Date
+    def perform_create(self, serializer):
+        day_date = self.kwargs.get('day_date')
+        date_obj = Date.objects.get(date=day_date, user=self.request.user)
 
-        return Response(serializer.data)
+        serializer.save(date=date_obj)
 
-    def patch(self, request, *args, **kwargs):
-        pk = kwargs.get('pk', None)
-        if not pk:
-            return Response({'error': 'Method PATCH is not allowed'})
-
-        try:
-            instance = Task.objects.get(pk=pk)
-        except:
-            return Response({'error': 'Object does not exists'})
-
-        serializer = TaskSerializer(data=request.data, instance=instance, partial=True)
+    @action(detail=True, methods=['patch'])
+    def change_status(self, request, *args, **kwargs):
+        task = self.get_object()
+        serializer = TaskStatusSerializer(instance=task, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-
             return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
-        if not pk:
-            return Response({'error': 'Method DELETE is not allowed'})
-
-        try:
-            instance = Task.objects.get(pk=pk)
-        except:
-            return Response({'error': 'Object does not exists'})
-
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        pk = instance.pk
         instance.delete()
         return Response({'message': f'Task {pk} deleted successfully'})

@@ -6,7 +6,8 @@ from . import views
 register_converter(DateConverter, 'ddmmyyyy')
 
 urlpatterns = [
-    path('', views.DateAPIView.as_view()),
-    path('tasks/<ddmmyyyy:day_date>/', views.TaskAPIView.as_view()),
-    path('tasks/<ddmmyyyy:day_date>/<int:pk>/', views.TaskAPIView.as_view()),
+    path('', views.DateViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('tasks/<ddmmyyyy:day_date>/', views.TaskViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('tasks/<ddmmyyyy:day_date>/<int:pk>/',
+         views.TaskViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})),
 ]

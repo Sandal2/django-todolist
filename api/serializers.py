@@ -3,27 +3,23 @@ from rest_framework import serializers
 from main.models import Date, Task
 
 
-class DateSerializer(serializers.Serializer):
-    date = serializers.DateField()
+class DateSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
 
-    def create(self, validated_data):
-        return Date.objects.create(**validated_data)
+    class Meta:
+        model = Date
+        fields = ['date', 'user']
 
 
-class TaskSerializer(serializers.Serializer):
-    pk = serializers.ReadOnlyField()
-    title = serializers.CharField()
-    description = serializers.CharField(allow_blank=True, required=False)
-    priority = serializers.ChoiceField(choices=Task.PRIORITY_CHOICES)
-    is_done = serializers.BooleanField()
+class TaskSerializer(serializers.ModelSerializer):
     date = serializers.ReadOnlyField(source='date.date')
 
-    def create(self, validated_data):
-        return Task.objects.create(**validated_data)
+    class Meta:
+        model = Task
+        fields = ['pk', 'title', 'description', 'priority', 'is_done', 'date']
 
-    def update(self, instance, validated_data):
-        instance.is_done = validated_data.get('is_done', instance.is_done)
-        instance.save()
 
-        return instance
+class TaskStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['is_done']
