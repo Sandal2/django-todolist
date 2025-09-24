@@ -49,11 +49,12 @@ class MainPageTestCase(TestCase):
         self.assertIn(self.existing_date, dates)  # проверяем что existing_date есть в коллекции dates
 
     def test_success_add_date(self):  # отправка формы
-        data = {'date': '2025-07-30'}
+        data = {'date': '30.07.2025'}
         response = self.client.post(self.path, data=data)  # добавляем дату (post-запрос)
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)  # проверяем редирект
-        self.assertTrue(Date.objects.filter(date=data['date'], user=self.user).exists())  # проверяем на наличие в бд
+        self.assertTrue(
+            Date.objects.filter(date=date(2025, 7, 30), user=self.user).exists())  # проверяем на наличие в бд
 
     def tearDown(self):
         pass
